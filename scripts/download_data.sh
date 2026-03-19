@@ -5,39 +5,34 @@ base=$scripts/..
 
 data=$base/data
 
-mkdir -p $data
+# list
+mkdir -p $data/europarl/raw
 
-tools=$base/tools
+# download
+wget -N https://www.statmt.org/europarl/v7/europarl.tgz
+tar -xvzf europarl.tgz -C $data/europarl/raw/ txt/
 
-# link default training data for easier access
+# combine and clean
+cat $data/europarl/raw/txt/en/ep-11-*.txt | grep -v '^<' > $data/europarl/raw/europarl_cleaned.txt
 
-mkdir -p $data/wikitext-2
+# preprocessing
+cat $data/europarl/raw/europarl_cleaned.txt | python3 $base/scripts/preprocess.py \
+    --vocab-size 10000 --tokenize --lang "en" --sent-tokenize > \
+    $data/europarl/raw/europarl.preprocessed.txt
 
-for corpus in train valid test; do
-    absolute_path=$(realpath $tools/pytorch-examples/word_language_model/data/wikitext-2/$corpus.txt)
-    ln -snf $absolute_path $data/wikitext-2/$corpus.txt
-done
 
-# download a different interesting data set!
+# dividing dataset
+# validation set
+head -n 5000 $data/europarl/raw/europarl.preprocessed.txt > $data/europarl/valid.txt
 
-mkdir -p $data/grimm
+# test set
+head -n 10000 $data/europarl/raw/europarl.preprocessed.txt | tail -n 5000 > $data/europarl/test.txt
 
-mkdir -p $data/grimm/raw
+# training set
+sed -n '10001,80000p' $data/europarl/raw/europarl.preprocessed.txt > $data/europarl/train.txt
 
-wget https://www.gutenberg.org/files/52521/52521-0.txt
-mv 52521-0.txt $data/grimm/raw/tales.txt
+# final delete
+rm -rf $data/europarl/raw/txt/
 
-# preprocess slightly
 
-cat $data/grimm/raw/tales.txt | python $base/scripts/preprocess_raw.py > $data/grimm/raw/tales.cleaned.txt
-
-# tokenize, fix vocabulary upper bound
-
-cat $data/grimm/raw/tales.cleaned.txt | python $base/scripts/preprocess.py --vocab-size 5000 --tokenize --lang "en" --sent-tokenize > \
-    $data/grimm/raw/tales.preprocessed.txt
-
-# split into train, valid and test
-
-head -n 440 $data/grimm/raw/tales.preprocessed.txt | tail -n 400 > $data/grimm/valid.txt
-head -n 840 $data/grimm/raw/tales.preprocessed.txt | tail -n 400 > $data/grimm/test.txt
-tail -n 3075 $data/grimm/raw/tales.preprocessed.txt | head -n 2955 > $data/grimm/train.txt
+ 

@@ -15,8 +15,10 @@ device=""
 
 (cd $tools/pytorch-examples/word_language_model &&
     CUDA_VISIBLE_DEVICES=$device OMP_NUM_THREADS=$num_threads python generate.py \
-        --data $data/grimm \
-        --words 100 \
-        --checkpoint $models/model.pt \
-        --outf $samples/sample
+        --data $data/europarl \
+        --words 200 \
+        --checkpoint $models/europarl_model.pt \
+        --outf $samples/europarl_sample.txt
 )
+
+echo "Sample text generated in $samples/europarl_sample.txt"
