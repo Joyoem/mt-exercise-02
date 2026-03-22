@@ -53,7 +53,7 @@ The following script has been modified to download and preprocess the **Europarl
 
 - Path Adaptation: Updated to utilize the preprocessed Europarl dataset.
 
-- Efficiency Tuning: Reduced training intensity to 20 epochs to balance performance and computation time.
+- Efficiency Tuning: Reduced training intensity to 20 epochs because each epoch costs about >10min, 40*10 is too lang.
 
 - Logging: Implemented a tee pipeline to preserve all terminal outputs into train_log.txt, which served as the primary data source for manual Test PPL extraction.
 
